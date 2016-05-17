@@ -7,5 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ldn0x7dc/react-native-view-transformer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ldn0x7dc/react-native-view-transformer/issues"
+  },
+  "homepage": "https://github.com/ldn0x7dc/react-native-view-transformer#readme"
 }
