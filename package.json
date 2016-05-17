@@ -1,19 +1,11 @@
 {
   "name": "react-native-view-transformer",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ldn0x7dc/react-native-view-transformer.git"
-  },
-  "bugs": {
-    "url": "https://github.com/ldn0x7dc/react-native-view-transformer/issues"
-  },
-  "homepage": "https://github.com/ldn0x7dc/react-native-view-transformer#readme"
+  "license": "ISC"
 }
