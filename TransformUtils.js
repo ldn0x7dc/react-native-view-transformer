@@ -13,18 +13,30 @@ export class Transform {
   }
 }
 
-function ensure(value, otherwise) {
-  return invalidValue(value) ? otherwise : value;
+function isValidNumber(number) {
+  if (typeof number === 'number') {
+    if (!isNaN(number)) {
+      return true;
+    }
+  }
+  return false;
 }
 
-function invalidValue(value) {
-  if (value === undefined || value === null) {
+function isValidRect(rect) {
+  if (rect instanceof Rect && rect.isValid()) {
     return true;
   }
   return false;
 }
 
-export function fitCenterRect(contentAspectRatio, containerRect: Rect) {
+function isValidTransform(transform) {
+  if (transform && isValidNumber(transform.scale) && isValidNumber(transform.translateX) && isValidNumber(transform.translateY)) {
+    return true;
+  }
+  return false;
+}
+
+export function fitCenterRect(contentAspectRatio, containerRect:Rect) {
   let w = containerRect.width();
   let h = containerRect.height();
   let viewAspectRatio = w / h;
@@ -43,26 +55,33 @@ export function fitCenterRect(contentAspectRatio, containerRect: Rect) {
   );
 }
 
+
+/**
+ * The React Native transform system use the center of the view as the pivot when scaling.
+ * The translations are applied before scaling.
+ * @param rect
+ * @param transform
+ * @returns {*}
+ */
 export function transformedRect(rect:Rect, transform:Transform) {
-  if (!transform) {
-    throw new Error('transformedRect...invalid transform');
-  }
-  if (!rect || !rect.valid()) {
+  if (!isValidRect(rect)) {
     throw new Error('transformedRect...invalid rect');
   }
+  if (!isValidTransform(transform)) {
+    throw new Error('transformedRect...invalid transform');
+  }
 
-  let scale = ensure(transform.scale, 1);
-  let translateX = ensure(transform.translateX, 0);
-  let translateY = ensure(transform.translateY, 0);
+  let scale = transform.scale;
+  let translateX = transform.translateX;
+  let translateY = transform.translateY;
 
   let pivot = transform.pivot;
   if (pivot === undefined || pivot === null) {
-    //no pivot provided, we make the center of the rect as the pivot when scaling
-    //so the center point remains still
     let width = rect.width() * scale;
     let height = rect.height() * scale;
     let centerX = rect.centerX() + translateX * scale;
     let centerY = rect.centerY() + translateY * scale;
+
     return new Rect(
       centerX - width / 2,
       centerY - height / 2,
@@ -72,7 +91,7 @@ export function transformedRect(rect:Rect, transform:Transform) {
   } else {
     let pivotX = pivot.x;
     let pivotY = pivot.y;
-    if (invalidValue(pivotX) || invalidValue(pivotY)) {
+    if (!isValidNumber(pivotX) || !isValidNumber(pivotY)) {
       throw new Error('transformedRect...invalid pivot x=' + pivot.x + ', y=' + pivot.y);
     }
 
@@ -88,14 +107,18 @@ export function transformedRect(rect:Rect, transform:Transform) {
   }
 }
 
+/**
+ * Calculate the transform from fromRect to toRect
+ * @param fromRect
+ * @param toRect
+ * @returns {Transform}
+ */
 export function getTransform(fromRect, toRect) {
-  console.log('getTransform...' + JSON.stringify(fromRect) + ' ' + JSON.stringify(toRect));
-
   let scale = toRect.width() / fromRect.width();
   let translateX = (toRect.centerX() - fromRect.centerX()) / scale;
   let translateY = (toRect.centerY() - fromRect.centerY()) / scale;
 
-  return new Transform(scale, translateX, translateY, undefined);
+  return new Transform(scale, translateX, translateY);
 }
 
 /**

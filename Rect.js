@@ -1,6 +1,5 @@
 'use strict';
 
-
 export default class Rect {
 
   constructor(left, top, right, bottom) {
@@ -50,7 +49,7 @@ export default class Rect {
     return this.left === rect.left && this.top === rect.top && this.right === rect.right && this.bottom && rect.bottom;
   }
 
-  valid() {
+  isValid() {
     if(this.left === undefined || this.left === null) {
       return false;
     }
