@@ -1,6 +1,7 @@
 'use strict';
 
-import React, {
+import React from 'react';
+import ReactNative, {
   View,
   Animated,
   Easing,
@@ -41,7 +42,6 @@ export default class ViewTransformer extends React.Component {
     this._viewPortRect = new Rect();
 
     this.onLayout = this.onLayout.bind(this);
-    this.onMeasure = this.onMeasure.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.handleFling = this.handleFling.bind(this);
     this.handlePanAndPinch = this.handlePanAndPinch.bind(this);
@@ -111,7 +111,7 @@ export default class ViewTransformer extends React.Component {
   componentWillMount() {
     this.panAndPinchResponder = PanAndPinchResponder.create({
       onStartShouldSetPanAndPinchResponder: function (e, gestureState) {
-        console.log('onStartShouldSetPanAndPinchResponder...');
+        //console.log('onStartShouldSetPanAndPinchResponder...');
         return true;
       },
       onPanAndPinchResponderMove: this.handlePanAndPinch,
@@ -124,23 +124,15 @@ export default class ViewTransformer extends React.Component {
   }
 
   onLayout(e) {
-    let {width, height} = e.nativeEvent.layout;
-    this.setState({
-      width: width,
-      height: height,
-    });
-
-    let handle = React.findNodeHandle(this.refs['innerViewRef']);
-    NativeModules.UIManager.measure(handle, this.onMeasure)
-  }
-
-  onMeasure(x, y, width, height, pageX, pageY) {
-    this.setState({
-      width: width,
-      height: height,
-      pageX: pageX,
-      pageY: pageY
-    });
+    let handle = ReactNative.findNodeHandle(this.refs['innerViewRef']);
+    NativeModules.UIManager.measure(handle, ((x, y, width, height, pageX, pageY) => {
+      this.setState({
+        width: width,
+        height: height,
+        pageX: pageX,
+        pageY: pageY
+      });
+    }).bind(this));
   }
 
   handleScroll(dx, dy, scroller:Scroller) {
@@ -149,15 +141,13 @@ export default class ViewTransformer extends React.Component {
       return;
     }
 
-    this.setState({
+    this.updateTransform({
       translateX: this.state.translateX + dx / this.state.scale,
       translateY: this.state.translateY + dy / this.state.scale
-    });
+    })
   }
 
   handleFling(e, gestureState) {
-    console.log('handleFling...velocityX=' + gestureState.vx + ' velocityY=' + gestureState.vy);
-
     let startX = 0;
     let startY = 0;
     let maxX, minX, maxY, minY;
@@ -205,7 +195,9 @@ export default class ViewTransformer extends React.Component {
   }
 
   handleDoubleTapUp(e, gestureState) {
-    console.log('handleDoubleTapUp...' + JSON.stringify(gestureState));
+    if(!this.props.enableScale) {
+      return;
+    }
 
     let curScale = this.state.scale;
     let scaleBy;
@@ -218,9 +210,7 @@ export default class ViewTransformer extends React.Component {
     let pivotY = gestureState.centroidY - this.state.pageY;
 
     let rect = transformedRect(this.transformedContentRect(), new Transform(
-      scaleBy,
-      0,
-      0,
+      scaleBy, 0, 0,
       {
         x: pivotX,
         y: pivotY
@@ -233,23 +223,21 @@ export default class ViewTransformer extends React.Component {
   }
 
   handlePanAndPinch(e, gestureState) {
-    console.log('handlePanAndPinch...' + JSON.stringify(gestureState));
     this.cancelAnimation();
 
     let dx = gestureState.dxSinceLast;
     let dy = gestureState.dySinceLast;
-    if(this.props.enableResistance) {
-      let d = this.applyResistanceX(dx, dy);
+    if (this.props.enableResistance) {
+      let d = this.applyResistance(dx, dy);
       dx = d.dx;
       dy = d.dy;
     }
 
     let transform = {};
-    if (gestureState.previousPinchDistance && gestureState.currentPinchDistance && this.props.enableScale) {
+    if (gestureState.previousPinchDistance && gestureState.currentPinchDistance) {
       let scaleBy = gestureState.currentPinchDistance / gestureState.previousPinchDistance;
       let pivotX = gestureState.centroidX - this.state.pageX;
       let pivotY = gestureState.centroidY - this.state.pageY;
-
 
 
       let rect = transformedRect(transformedRect(this.contentRect(), this.currentTransform()), new Transform(
@@ -269,10 +257,11 @@ export default class ViewTransformer extends React.Component {
       transform.translateX = this.state.translateX + dx / this.state.scale;
       transform.translateY = this.state.translateY + dy / this.state.scale;
     }
-    this.setState(transform);
+    //this.setState(transform);
+    this.updateTransform(transform);
   }
 
-  applyResistanceX(dx, dy) {
+  applyResistance(dx, dy) {
     let availablePanDistance = availableTranslateSpace(this.transformedContentRect(), this.viewPortRect());
 
     if ((dx > 0 && availablePanDistance.left < 0)
@@ -334,7 +323,9 @@ export default class ViewTransformer extends React.Component {
       let bottom = fromRect.bottom + (targetRect.bottom - fromRect.bottom) * progress;
 
       let transform = getTransform(this.contentRect(), new Rect(left, top, right, bottom));
-      this.setState(transform);
+      //this.setState(transform);
+
+      this.updateTransform(transform);
     }.bind(this));
     Animated.timing(this.state.animator, {
       toValue: 1,
@@ -367,6 +358,15 @@ export default class ViewTransformer extends React.Component {
     this.animate(rect);
   }
 
+  updateTransform(transform) {
+    if(this.props.enableTransform) {
+      if(!this.props.enableScale) {
+        transform.scale = 1;
+      }
+
+      this.setState(transform);
+    }
+  }
 
   debug() {
     console.log('------debug------');
@@ -375,6 +375,30 @@ export default class ViewTransformer extends React.Component {
   }
 }
 
+ViewTransformer.propTypes = {
+  /**
+   * Use false to disable transform. Default is true.
+   */
+  enableTransform: React.PropTypes.bool,
+
+  /**
+   * Use false to disable scaling. Default is true.
+   */
+  enableScale: React.PropTypes.bool,
+
+  /**
+   * Default is 20
+   */
+  maxOverScrollDistance: React.PropTypes.number,
+
+  maxScale: React.propTypes.number,
+
+  /**
+   * Use true to enable resistance effect on over pulling. Default is false.
+   */
+  enableResistance: React.propTypes.bool
+
+};
 ViewTransformer.defaultProps = {
   maxOverScrollDistance: 20,
   enableScale: true,

@@ -31,7 +31,7 @@ export default class TransformableImage extends Component {
 
     return (
       <ViewTransformer
-        key={JSON.stringify(this.props.source)}
+        key={JSON.stringify(this.props.source)} //when image source changes, we should use a different node to avoid reusing previous transform state
         enableTransform={this.state.imageLoaded} //disable transform until image is loaded
         enableResistance={true}
         maxScale={maxScale}
