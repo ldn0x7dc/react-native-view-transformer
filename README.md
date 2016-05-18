@@ -2,7 +2,7 @@
 
 `react-native-view-transformer` is a pure JavaScript RN component that makes **ANY** views transformable using gestures like pinch, double tap or pull, as below shows:
 
-![](./demo/1.gif)
+![](https://raw.githubusercontent.com/yoaicom/react-native-demo/react-native-view-transformer/resources/1.gif)
 
 Demo project is [here](https://github.com/yoaicom/react-native-demo/tree/react-native-view-transformer)
 
@@ -58,7 +58,7 @@ image: {
 
 ###### demo
 
-![](./demo/2.gif)
+![](https://raw.githubusercontent.com/yoaicom/react-native-demo/react-native-view-transformer/resources/2.gif)
 
 
 
