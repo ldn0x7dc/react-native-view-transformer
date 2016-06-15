@@ -25,9 +25,13 @@ export default class TransformableImage extends Component {
     }).bind(this);
 
     if(typeof Image.getSize === 'function') {
-      Image.getSize(this.props.source, successCallback, (error) => {
-        console.log('getPixels...error=' + JSON.stringify(error));
-      })
+      if (this.props.source && this.props.source.uri) {
+        Image.getSize(this.props.source.uri, successCallback, (error) => {
+          console.log('getPixels...error=' + JSON.stringify(error));
+        })
+      } else {
+        console.log('getPixels...please provide pixels prop for local images');
+      }
     } else {
       console.log('getPixels...Image.getSize function not available');
     }
