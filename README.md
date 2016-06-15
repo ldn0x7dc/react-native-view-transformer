@@ -2,11 +2,9 @@
 
 `react-native-view-transformer` is a pure JavaScript RN component that makes **ANY** views transformable using gestures like pinch, double tap or pull, as below shows:
 
-**Not working well on Android due to this [issue](https://github.com/facebook/react-native/issues/8104)** with RN v0.27 and v0.28, please wait.
-
 ![](https://raw.githubusercontent.com/yoaicom/react-native-demo/react-native-view-transformer/resources/1.gif)
 
-Demo project is [here](https://github.com/yoaicom/react-native-demo/tree/react-native-view-transformer)
+Demo project is in the ***Demo*** folder.
 
 ## Install
 
@@ -14,23 +12,21 @@ Demo project is [here](https://github.com/yoaicom/react-native-demo/tree/react-n
 
 ## Usage
 
-First, import:
-
 ```
 import ViewTransformer from 'react-native-view-transformer';
+...
+render() {
+  return (
+  	<ViewTransformer>
+	  //ANY views
+	</ViewTransformer>
+  );
+}
 ```
 
-Then, render:
+Now, the wrapped views are transformable!
 
-```
-<ViewTransformer>
-  //Your views here
-</ViewTransformer>
-```
-
-Now, your views are transformable!
-
-##### ViewTransformer.Image
+## ViewTransformer.Image
 
 The most common case is to transform an image, or a photo, which is famous as a ***PhotoView***, or ***ImageViewer***, so we provide a similar component **ViewTransformer.Image**, which is much like the official Image component, but ***transformable***!
 
@@ -40,15 +36,15 @@ The most common case is to transform an image, or a photo, which is famous as a 
 <ViewTransformer.Image
   style={{width: width, height: height}}
   source={{uri: 'xxx'}}
-  pixels={{width: 1920, height: 1080}} //this prop is important!
+  pixels={{width: 1920, height: 1080}} //Be careful with this prop
 />
 ```
 
-But with an additional prop **pixels**, which tells image size in pixels. 
+The additional prop **pixels** tells image size in pixels. (*This prop is used to align the edge of the image content with the view's boundry when scaled up and to determine the max scale*)
 
-The **pixels** prop is used to align the edge of the image content with the view's boundry and to determine the max scale.(We can actually use ***Image.getSize*** to get pixels info on iOS, but [NOT on Android](https://github.com/facebook/react-native/issues/5838), so for now this prop is needed)
+#### Good news: with react native v0.28 and above, we can use ***Image.getSize*** to get pixels info using image url both on iOS and Android, so the **pixels** prop is **optional** for remote images.
 
-There may be a problem: ***How can I find the pixels info of a remote image without loading it?*** Well, you can ask your app's API server to provide it. For example, the API server may return a json like
+Bad news: with react native v0.27 and below, we can only use ***Image.getSize*** to get pixels info on iOS, but [NOT on Android](https://github.com/facebook/react-native/issues/5838), so the **pixels** prop is needed. You can ask your app's API server to provide  the pixels info of remote images. For example, the API server may return a json like
 
 ```
 image: {

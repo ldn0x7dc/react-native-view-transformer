@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/yoaicom/react-native-view-transformer#readme",
   "dependencies": {
-    "react-native-gesture-responder": "^0.0.2"
+    "react-native-gesture-responder": "^0.0.3"
   }
 }
