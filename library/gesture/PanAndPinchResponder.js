@@ -213,7 +213,7 @@ var PanAndPinchResponder = {
           gestureState.flingFailed = true;
         }
 
-        console.log('onResponderEnd...numberActiveTouches=' + touchHistory.numberActiveTouches);
+        console.log('onResponderEnd...numberActiveTouches=' + touchHistory.numberActiveTouches + ', singleTabUpFailed=' + gestureState.singleTabUpFailed);
       },
 
       onResponderTerminate: function (e) {

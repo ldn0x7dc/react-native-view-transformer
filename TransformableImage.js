@@ -6,6 +6,7 @@ import { Image } from 'react-native';
 import ViewTransformer from './ViewTransformer';
 
 export default class TransformableImage extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -15,17 +16,43 @@ export default class TransformableImage extends Component {
     };
   }
 
+  getPixels() {
+    let successCallback = ((width, height) => {
+      console.log('getPixels...width=' + width + ', height=' + height);
+      this.setState({
+        pixels: {width, height}
+      });
+    }).bind(this);
+
+    if(typeof Image.getSize === 'function') {
+      Image.getSize(this.props.source, successCallback, (error) => {
+        console.log('getPixels...error=' + JSON.stringify(error));
+      })
+    } else {
+      console.log('getPixels...Image.getSize function not available');
+    }
+  }
+
   render() {
     let maxScale = 1;
     let contentAspectRatio = undefined;
-    if (this.props.pixels) {
-      let {width, height} = this.props.pixels;
-      if (width && height) {
-        contentAspectRatio = width / height;
-        if (this.state.width && this.state.height) {
-          maxScale = Math.max(width / this.state.width, height / this.state.height);
-          maxScale = Math.max(1, maxScale);
-        }
+
+    let width, height;
+    if(this.props.pixels) {
+      width = this.props.pixels.width;
+      height = this.props.pixels.height;
+    } else if(this.state.pixels) {
+      width = this.state.pixels.width;
+      height = this.state.pixels.height;
+    } else {
+      this.getPixels();
+    }
+
+    if (width && height) {
+      contentAspectRatio = width / height;
+      if (this.state.width && this.state.height) {
+        maxScale = Math.max(width / this.state.width, height / this.state.height);
+        maxScale = Math.max(1, maxScale);
       }
     }
 
