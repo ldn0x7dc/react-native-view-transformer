@@ -24,7 +24,7 @@ export default class Demo extends Component {
         <ViewTransformer.Image
           style={{width: width, height: height - 100}}
           source={{uri: 'https://raw.githubusercontent.com/yoaicom/react-native-demo/res/res/dany%20game%20of%20thrones.jpg'}}
-          pixels={{width: 1920, height: 1080}}
+          //pixels={{width: 1920, height: 1080}}
         />
 
         <Text style={{fontSize: 16, margin: 10}}>

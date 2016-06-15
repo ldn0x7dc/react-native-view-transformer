@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/yoaicom/react-native-view-transformer/issues"
   },
-  "homepage": "https://github.com/yoaicom/react-native-view-transformer#readme"
+  "homepage": "https://github.com/yoaicom/react-native-view-transformer#readme",
+  "dependencies": {
+    "react-native-gesture-responder": "^0.0.2"
+  }
 }

@@ -8,7 +8,8 @@ import ReactNative, {
   NativeModules
 } from 'react-native';
 
-import PanAndPinchResponder from './library/gesture/PanAndPinchResponder';
+import {createResponder} from 'react-native-gesture-responder';
+
 import Scroller from './library/scroller/Scroller';
 import TransformableImage from './TransformableImage';
 
@@ -43,10 +44,10 @@ export default class ViewTransformer extends React.Component {
 
     this.onLayout = this.onLayout.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
-    this.handleFling = this.handleFling.bind(this);
-    this.handlePanAndPinch = this.handlePanAndPinch.bind(this);
-    this.handleDoubleTapUp = this.handleDoubleTapUp.bind(this);
-    this.handleEnd = this.handleEnd.bind(this);
+
+    this.handleMove = this.handleMove.bind(this);
+    this.handleRelease = this.handleRelease.bind(this);
+
     this.cancelAnimation = this.cancelAnimation.bind(this);
     this.debug = this.debug.bind(this);
     this.contentRect = this.contentRect.bind(this);
@@ -80,7 +81,7 @@ export default class ViewTransformer extends React.Component {
   }
 
   render() {
-    let gestureResponder = this.panAndPinchResponder;
+    let gestureResponder = this.gestureResponder;
     if (!this.props.enableTransform) {
       gestureResponder = {};
     }
@@ -109,16 +110,13 @@ export default class ViewTransformer extends React.Component {
   }
 
   componentWillMount() {
-    this.panAndPinchResponder = PanAndPinchResponder.create({
-      onStartShouldSetPanAndPinchResponder: function (e, gestureState) {
-        //console.log('onStartShouldSetPanAndPinchResponder...');
-        return true;
-      },
-      onPanAndPinchResponderMove: this.handlePanAndPinch,
-      onPanAndPinchResponderRelease: this.handleEnd,
-      onPanAndPinchResponderTerminate: this.handleEnd,
-      onPanAndPinchResponderDoubleTabUp: this.handleDoubleTapUp,
-      onPanAndPinchResponderFling: this.handleFling
+    this.gestureResponder = createResponder({
+      onStartShouldSetResponder: (evt, gestureState) => true,
+      onMoveShouldSetResponder: (evt, gestureState) => true,
+      onResponderMove: this.handleMove,
+      onResponderRelease: this.handleRelease,
+      onResponderTerminate: this.handleRelease,
+      onResponderTerminationRequest: (evt, gestureState) => true
     });
     this.scroller = Scroller.create(this.handleScroll);
   }
@@ -147,12 +145,12 @@ export default class ViewTransformer extends React.Component {
     })
   }
 
-  handleFling(e, gestureState) {
+  performFling(vx, vy) {
     let startX = 0;
     let startY = 0;
     let maxX, minX, maxY, minY;
     let availablePanDistance = availableTranslateSpace(this.transformedContentRect(), this.viewPortRect());
-    if (gestureState.vx > 0) {
+    if (vx > 0) {
       minX = 0;
       if (availablePanDistance.left > 0) {
         maxX = availablePanDistance.left + this.props.maxOverScrollDistance;
@@ -167,7 +165,7 @@ export default class ViewTransformer extends React.Component {
         minX = 0;
       }
     }
-    if (gestureState.vy > 0) {
+    if (vy > 0) {
       minY = 0;
       if (availablePanDistance.top > 0) {
         maxY = availablePanDistance.top + this.props.maxOverScrollDistance;
@@ -183,8 +181,8 @@ export default class ViewTransformer extends React.Component {
       }
     }
 
-    var vx = gestureState.vx * 1000; //per second
-    var vy = gestureState.vy * 1000;
+    vx *= 1000; //per second
+    vy *= 1000;
     if (Math.abs(vx) > 2 * Math.abs(vy)) {
       vy = 0;
     } else if (Math.abs(vy) > 2 * Math.abs(vx)) {
@@ -194,11 +192,8 @@ export default class ViewTransformer extends React.Component {
     this.scroller.fling(startX, startY, vx, vy, minX, maxX, minY, maxY);
   }
 
-  handleDoubleTapUp(e, gestureState) {
-    if(!this.props.enableScale) {
-      return;
-    }
-
+  performDoubleTapUp(pivotX, pivotY) {
+    console.log('performDoubleTapUp...pivot=' + pivotX + ', ' + pivotY);
     let curScale = this.state.scale;
     let scaleBy;
     if (curScale > (1 + this.props.maxScale) / 2) {
@@ -206,8 +201,6 @@ export default class ViewTransformer extends React.Component {
     } else {
       scaleBy = this.props.maxScale / curScale;
     }
-    let pivotX = gestureState.centroidX - this.state.pageX;
-    let pivotY = gestureState.centroidY - this.state.pageY;
 
     let rect = transformedRect(this.transformedContentRect(), new Transform(
       scaleBy, 0, 0,
@@ -222,11 +215,11 @@ export default class ViewTransformer extends React.Component {
     this.animate(rect);
   }
 
-  handlePanAndPinch(e, gestureState) {
+  handleMove(e, gestureState) {
     this.cancelAnimation();
 
-    let dx = gestureState.dxSinceLast;
-    let dy = gestureState.dySinceLast;
+    let dx = gestureState.moveX - gestureState.previousMoveX;
+    let dy = gestureState.moveY - gestureState.previousMoveY;
     if (this.props.enableResistance) {
       let d = this.applyResistance(dx, dy);
       dx = d.dx;
@@ -234,10 +227,10 @@ export default class ViewTransformer extends React.Component {
     }
 
     let transform = {};
-    if (gestureState.previousPinchDistance && gestureState.currentPinchDistance) {
-      let scaleBy = gestureState.currentPinchDistance / gestureState.previousPinchDistance;
-      let pivotX = gestureState.centroidX - this.state.pageX;
-      let pivotY = gestureState.centroidY - this.state.pageY;
+    if (gestureState.previousPinch && gestureState.pinch) {
+      let scaleBy = gestureState.pinch / gestureState.previousPinch;
+      let pivotX = gestureState.moveX - this.state.pageX;
+      let pivotY = gestureState.moveY - this.state.pageY;
 
 
       let rect = transformedRect(transformedRect(this.contentRect(), this.currentTransform()), new Transform(
@@ -257,7 +250,7 @@ export default class ViewTransformer extends React.Component {
       transform.translateX = this.state.translateX + dx / this.state.scale;
       transform.translateY = this.state.translateY + dy / this.state.scale;
     }
-    //this.setState(transform);
+
     this.updateTransform(transform);
   }
 
@@ -279,20 +272,25 @@ export default class ViewTransformer extends React.Component {
     }
   }
 
-  handleEnd(e, gestureState) {
-    if (this.props.onGestureEnd) {
-      let e = {
-        transform: this.currentTransform(),
-        width: this.state.width,
-        height: this.state.height
-      };
-      if (this.props.onGestureEnd(e)) {
+  handleRelease(e, gestureState) {
+    console.log('handleRelease...' + JSON.stringify(gestureState));
+    if(gestureState.doubleTapUp) {
+      if(!this.props.enableScale) {
+        this.animateBounce();
         return;
       }
-    }
+      let pivotX = 0, pivotY = 0;
+      if(gestureState.dx || gestureState.dy) {
+        pivotX = gestureState.moveX - this.state.pageX;
+        pivotY = gestureState.moveY - this.state.pageY;
+      } else {
+        pivotX = gestureState.x0 - this.state.pageX;
+        pivotY = gestureState.y0 - this.state.pageY;
+      }
 
-    if (!gestureState.releaseWithFling && !gestureState.releaseWithDoubleTab) {
-      this.animateBounce();
+      this.performDoubleTapUp(pivotX, pivotY);
+    } else {
+      this.performFling(gestureState.vx, gestureState.vy);
     }
   }
 
@@ -391,12 +389,12 @@ ViewTransformer.propTypes = {
    */
   maxOverScrollDistance: React.PropTypes.number,
 
-  maxScale: React.propTypes.number,
+  maxScale: React.PropTypes.number,
 
   /**
    * Use true to enable resistance effect on over pulling. Default is false.
    */
-  enableResistance: React.propTypes.bool
+  enableResistance: React.PropTypes.bool
 
 };
 ViewTransformer.defaultProps = {
