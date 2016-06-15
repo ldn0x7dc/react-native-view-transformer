@@ -60,5 +60,10 @@ image: {
 
 
 
+We're considering moving **ViewTransformer.Image** to a dedicated module **react-native-transformable-image**.
+This module will continue to serve as a more basic and general transform utility.
+
+
+
 
 
