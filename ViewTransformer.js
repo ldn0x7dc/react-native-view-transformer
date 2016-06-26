@@ -15,6 +15,8 @@ import TransformableImage from './TransformableImage';
 
 import {Rect, Transform, transformedRect, availableTranslateSpace, fitCenterRect, alignedRect, getTransform} from './TransformUtils';
 
+const MIN_SCROLL_THRESHOLD = 10;
+
 export default class ViewTransformer extends React.Component {
 
   static get Image() {
@@ -37,7 +39,10 @@ export default class ViewTransformer extends React.Component {
       width: 0,
       height: 0,
       pageX: 0,
-      pageY: 0
+      pageY: 0,
+
+      //responder grant
+      responderGranted: false
     };
 
     this._viewPortRect = new Rect();
@@ -81,9 +86,11 @@ export default class ViewTransformer extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this.props.onViewTransformed && this.props.onViewTransformed(
-      this.state.scale, this.state.translateX, this.state.translateY
-    );
+    this.props.onViewTransformed && this.props.onViewTransformed({
+      scale: this.state.scale,
+      translateX: this.state.translateX,
+      translateY: this.state.translateY
+    });
   }
 
   render() {
@@ -117,14 +124,22 @@ export default class ViewTransformer extends React.Component {
 
   componentWillMount() {
     this.gestureResponder = createResponder({
-      onStartShouldSetResponder: (evt, gestureState) => true,
-      onMoveShouldSetResponder: (evt, gestureState) => true,
+      onStartShouldSetResponder: (evt, gestureState) => false,
+      onMoveShouldSetResponder: this.handleMove,
       onResponderMove: this.handleMove,
+      onResponderGrant: ((evt) => {
+        this.setState({responderGranted: true});
+      }).bind(this),
       onResponderRelease: this.handleRelease,
       onResponderTerminate: this.handleRelease,
       onResponderTerminationRequest: (evt, gestureState) => true
     });
     this.scroller = Scroller.create(this.handleScroll);
+  }
+
+  componentWillUnmount() {
+    console.log('componentWillUnmount...');
+    this.cancelAnimation();
   }
 
   onLayout(e) {
@@ -222,6 +237,13 @@ export default class ViewTransformer extends React.Component {
   }
 
   handleMove(e, gestureState) {
+    if (!this.state.responderGranted) {
+      if (Math.abs(gestureState.dx) >= 10 || Math.abs(gestureState.dy) >= 10) {
+        return true;
+      }
+    }
+
+
     this.cancelAnimation();
 
     let dx = gestureState.moveX - gestureState.previousMoveX;
@@ -280,13 +302,27 @@ export default class ViewTransformer extends React.Component {
 
   handleRelease(e, gestureState) {
     console.log('handleRelease...' + JSON.stringify(gestureState));
-    if(gestureState.doubleTapUp) {
-      if(!this.props.enableScale) {
+    this.setState({
+      responderGranted: false
+    });
+
+    let handled = this.props.onTransformGestureReleased && this.props.onTransformGestureReleased({
+        scale: this.state.scale,
+        translateX: this.state.translateX,
+        translateY: this.state.translateY
+      });
+    if(handled) {
+      return;
+    }
+
+
+    if (gestureState.doubleTapUp) {
+      if (!this.props.enableScale) {
         this.animateBounce();
         return;
       }
       let pivotX = 0, pivotY = 0;
-      if(gestureState.dx || gestureState.dy) {
+      if (gestureState.dx || gestureState.dy) {
         pivotX = gestureState.moveX - this.state.pageX;
         pivotY = gestureState.moveY - this.state.pageY;
       } else {
@@ -362,8 +398,10 @@ export default class ViewTransformer extends React.Component {
   }
 
   updateTransform(transform) {
-    if(this.props.enableTransform) {
-      if(!this.props.enableScale) {
+    console.log('updateTransform...');
+
+    if (this.props.enableTransform) {
+      if (!this.props.enableScale) {
         transform.scale = 1;
       }
 
@@ -401,8 +439,9 @@ ViewTransformer.propTypes = {
    */
   enableResistance: React.PropTypes.bool,
 
-  onViewTransformed: React.Properties.func
+  onViewTransformed: React.PropTypes.func,
 
+  onTransformGestureReleased: React.PropTypes.func
 };
 ViewTransformer.defaultProps = {
   maxOverScrollDistance: 20,
