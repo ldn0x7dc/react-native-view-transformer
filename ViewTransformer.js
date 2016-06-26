@@ -80,6 +80,12 @@ export default class ViewTransformer extends React.Component {
     return new Transform(this.state.scale, this.state.translateX, this.state.translateY);
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    this.props.onViewTransformed && this.props.onViewTransformed(
+      this.state.scale, this.state.translateX, this.state.translateY
+    );
+  }
+
   render() {
     let gestureResponder = this.gestureResponder;
     if (!this.props.enableTransform) {
@@ -321,7 +327,6 @@ export default class ViewTransformer extends React.Component {
       let bottom = fromRect.bottom + (targetRect.bottom - fromRect.bottom) * progress;
 
       let transform = getTransform(this.contentRect(), new Rect(left, top, right, bottom));
-      //this.setState(transform);
 
       this.updateTransform(transform);
     }.bind(this));
@@ -394,7 +399,9 @@ ViewTransformer.propTypes = {
   /**
    * Use true to enable resistance effect on over pulling. Default is false.
    */
-  enableResistance: React.PropTypes.bool
+  enableResistance: React.PropTypes.bool,
+
+  onViewTransformed: React.Properties.func
 
 };
 ViewTransformer.defaultProps = {
