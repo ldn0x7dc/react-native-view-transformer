@@ -18,6 +18,10 @@ const MIN_SCROLL_THRESHOLD = 10;
 
 export default class ViewTransformer extends React.Component {
 
+  static Rect = Rect;
+  static getTransform = getTransform;
+
+
   constructor(props) {
     super(props);
 
@@ -49,7 +53,6 @@ export default class ViewTransformer extends React.Component {
     this.handleRelease = this.handleRelease.bind(this);
 
     this.cancelAnimation = this.cancelAnimation.bind(this);
-    this.debug = this.debug.bind(this);
     this.contentRect = this.contentRect.bind(this);
     this.transformedContentRect = this.transformedContentRect.bind(this);
     this.animate = this.animate.bind(this);
@@ -119,10 +122,14 @@ export default class ViewTransformer extends React.Component {
 
   componentWillMount() {
     this.gestureResponder = createResponder({
-      onStartShouldSetResponder: (evt, gestureState) => true,
+      onStartShouldSetResponder: (evt, gestureState) => {
+
+        return true;
+      },
       onMoveShouldSetResponder: this.handleMove,
       onResponderMove: this.handleMove,
       onResponderGrant: ((evt) => {
+        this.props.onTransformStart && this.props.onTransformStart();
         this.setState({responderGranted: true});
       }).bind(this),
       onResponderRelease: this.handleRelease,
@@ -312,7 +319,7 @@ export default class ViewTransformer extends React.Component {
         translateX: this.state.translateX,
         translateY: this.state.translateY
       });
-    if(handled) {
+    if (handled) {
       return;
     }
 
@@ -408,10 +415,8 @@ export default class ViewTransformer extends React.Component {
     }
   }
 
-  debug() {
-    console.log('------debug------');
-    console.log('state=' + JSON.stringify(this.state));
-    console.log('-------end-------');
+  setTransform(transform) {
+    this.setState(transform);
   }
 }
 
