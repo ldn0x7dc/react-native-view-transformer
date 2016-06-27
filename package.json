@@ -2,7 +2,7 @@
   "name": "react-native-view-transformer",
   "version": "0.0.10",
   "description": "`react-native-view-transformer` is a pure JavaScript RN component that makes **ANY** views transformable using gestures like pinch, double tap or pull, as below shows:",
-  "main": "index.js",
+  "main": "library/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,12 +10,12 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yoaicom/react-native-view-transformer.git"
+    "url": "git+https://github.com/ldn0x7dc/react-native-view-transformer.git"
   },
   "bugs": {
-    "url": "https://github.com/yoaicom/react-native-view-transformer/issues"
+    "url": "https://github.com/ldn0x7dc/react-native-view-transformer/issues"
   },
-  "homepage": "https://github.com/yoaicom/react-native-view-transformer#readme",
+  "homepage": "https://github.com/ldn0x7dc/react-native-view-transformer#readme",
   "dependencies": {
     "react-native-gesture-responder": "^0.0.3"
   }

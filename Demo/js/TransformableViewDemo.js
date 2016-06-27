@@ -5,7 +5,8 @@ import {
   StyleSheet,
   Text,
   View,
-  Image
+  Image,
+  TouchableOpacity
 } from 'react-native';
 
 import ViewTransformer from 'react-native-view-transformer';
@@ -18,16 +19,20 @@ export default class Demo extends Component {
 
   render() {
     return (
-      <ViewTransformer
-        onGestureEnd={(e) => {
-          console.log('onGestureEnd...' + JSON.stringify(e))
-          return false;
-        }}
-        enableResistance={true}
-        maxScale={3}
-        style={{flex: 1}}>
-        <AnyView />
-      </ViewTransformer>
+      <View style={{flex: 1, justifyContent: 'flex-end'}}>
+
+        <View
+          style={{height: 100, backgroundColor: '#cccc'}}
+        />
+
+        <ViewTransformer
+          enableResistance={true}
+          maxScale={3}
+          style={{position: 'absolute', left: 0, right: 0, top: 0, bottom: 100}}>
+          <AnyView />
+        </ViewTransformer>
+      </View>
+
     );
   }
 }
@@ -36,9 +41,15 @@ class AnyView extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          To make ANY view transformable!
-        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            console.log('onPress...');
+          }}>
+          <Text style={styles.welcome}>
+            Press Me
+          </Text>
+        </TouchableOpacity>
+
         <Image
           style={{width: 300, height: 200}}
           source={{uri: 'https://raw.githubusercontent.com/yoaicom/react-native-demo/res/res/dany%20game%20of%20thrones.jpg'}}
@@ -80,7 +91,8 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 5, height: 5},
     shadowOpacity: 0.5,
     shadowRadius: 5,
-    margin: 20
+    margin: 20,
+    elevation: 10
   },
   welcome: {
     fontSize: 20,

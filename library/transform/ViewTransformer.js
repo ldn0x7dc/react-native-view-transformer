@@ -10,18 +10,13 @@ import ReactNative, {
 
 import {createResponder} from 'react-native-gesture-responder';
 
-import Scroller from './library/scroller/Scroller';
-import TransformableImage from './TransformableImage';
+import Scroller from '../scroller/Scroller';
 
 import {Rect, Transform, transformedRect, availableTranslateSpace, fitCenterRect, alignedRect, getTransform} from './TransformUtils';
 
 const MIN_SCROLL_THRESHOLD = 10;
 
 export default class ViewTransformer extends React.Component {
-
-  static get Image() {
-    return TransformableImage;
-  }
 
   constructor(props) {
     super(props);
@@ -103,7 +98,7 @@ export default class ViewTransformer extends React.Component {
       <View
         {...this.props}
         {...gestureResponder}
-        style={[this.props.style, {overflow: 'hidden'}]}>
+        style={[this.props.style, {overflow: 'visible'}]}>
         <View
           ref={'innerViewRef'}
           onLayout={this.onLayout}
@@ -124,7 +119,7 @@ export default class ViewTransformer extends React.Component {
 
   componentWillMount() {
     this.gestureResponder = createResponder({
-      onStartShouldSetResponder: (evt, gestureState) => false,
+      onStartShouldSetResponder: (evt, gestureState) => true,
       onMoveShouldSetResponder: this.handleMove,
       onResponderMove: this.handleMove,
       onResponderGrant: ((evt) => {
@@ -237,9 +232,14 @@ export default class ViewTransformer extends React.Component {
   }
 
   handleMove(e, gestureState) {
+    console.log('handleMove...');
+
     if (!this.state.responderGranted) {
-      if (Math.abs(gestureState.dx) >= 10 || Math.abs(gestureState.dy) >= 10) {
+      if (Math.abs(gestureState.dx) >= MIN_SCROLL_THRESHOLD || Math.abs(gestureState.dy) >= MIN_SCROLL_THRESHOLD) {
+        console.log('handleMove...require responder');
         return true;
+      } else {
+        return false;
       }
     }
 
@@ -280,6 +280,7 @@ export default class ViewTransformer extends React.Component {
     }
 
     this.updateTransform(transform);
+    return true;
   }
 
   applyResistance(dx, dy) {
@@ -398,8 +399,6 @@ export default class ViewTransformer extends React.Component {
   }
 
   updateTransform(transform) {
-    console.log('updateTransform...');
-
     if (this.props.enableTransform) {
       if (!this.props.enableScale) {
         transform.scale = 1;

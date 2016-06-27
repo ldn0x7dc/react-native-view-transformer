@@ -45,23 +45,17 @@ export default class Rect {
   }
 
 
-  equals(rect: Rect) {
+  equals(rect:Rect) {
     return this.left === rect.left && this.top === rect.top && this.right === rect.right && this.bottom && rect.bottom;
   }
 
   isValid() {
-    if(this.left === undefined || this.left === null) {
-      return false;
+    if (typeof this.left === 'number'
+      && typeof this.right === 'number'
+      && typeof this.top === 'number'
+      && typeof this.bottom === 'number') {
+      return true;
     }
-    if(this.right === undefined || this.right === null) {
-      return false;
-    }
-    if(this.top === undefined || this.top === null) {
-      return false;
-    }
-    if(this.bottom === undefined || this.bottom === null) {
-      return false;
-    }
-    return true;
+    return false;
   }
 }

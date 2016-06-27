@@ -2,8 +2,7 @@
 
 import React, { Component } from 'react';
 
-import ImageDemo from './js/TransformableImageDemo';
-import ViewDemo from './js/TransformableViewDemo';
+import TransformableViewDemo from './js/TransformableViewDemo';
 
 export default class App extends Component {
 
@@ -13,8 +12,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <ImageDemo />
-      //<ViewDemo />
+      <TransformableViewDemo />
     );
   }
 }
