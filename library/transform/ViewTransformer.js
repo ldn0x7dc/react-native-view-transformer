@@ -147,6 +147,13 @@ export default class ViewTransformer extends React.Component {
   onLayout(e) {
     let handle = ReactNative.findNodeHandle(this.refs['innerViewRef']);
     NativeModules.UIManager.measure(handle, ((x, y, width, height, pageX, pageY) => {
+      if(typeof this.props.pageX === 'number') {
+        pageX = this.props.pageX;
+      }
+      if(typeof this.props.pageY === 'number') {
+        pageY = this.props.pageY;
+      }
+
       this.setState({
         width: width,
         height: height,
