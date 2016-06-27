@@ -30,7 +30,7 @@ Now, the wrapped views are transformable!
 
 ## Transformable Image
 
-The most common case is to transform an image, or a photo, which is famous as a ***PhotoView***, or ***ImageViewer***, so we provide a dedicated component [**react-native-transformable-image**](https://github.com/yoaicom/react-native-transformable-image)
+The most common case is to transform an image, or a photo, which is famous as a ***PhotoView***, or ***ImageViewer***, so we provide a dedicated component [**react-native-transformable-image**](https://github.com/ldn0x7dc/react-native-transformable-image)
 
 
 
