@@ -123,7 +123,8 @@ export default class ViewTransformer extends React.Component {
       onResponderTerminate: this.handleRelease,
       onResponderTerminationRequest: (evt, gestureState) => true
     });
-    this.scroller = Scroller.create(this.handleScroll);
+
+    this.scroller = new Scroller(true, this.handleScroll);
   }
 
   onResponderGrant(evt, gestureState) {
