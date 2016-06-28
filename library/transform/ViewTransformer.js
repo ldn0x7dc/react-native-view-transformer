@@ -90,7 +90,11 @@ export default class ViewTransformer extends React.Component {
       <View
         {...this.props}
         {...gestureResponder}
-        ref={'innerViewRef'}>
+        ref={'innerViewRef'}
+        onLayout={(e) => {
+          this.props.onLayout && this.props.onLayout(e);
+          this.measureLayout();
+        }}>
         <View
           style={{
             flex: 1,
@@ -109,24 +113,31 @@ export default class ViewTransformer extends React.Component {
   componentWillMount() {
     this.gestureResponder = createResponder({
       onStartShouldSetResponder: (evt, gestureState) => {
-        this.measureLayout();
+        //this.measureLayout();
         return true;
       },
       onMoveShouldSetResponder: this.handleMove,
-      onResponderMove: this.handleMove,
-      onResponderGrant: ((evt) => {
-        this.props.onTransformStart && this.props.onTransformStart();
-        this.setState({responderGranted: true});
-      }).bind(this),
-      onResponderRelease: this.handleRelease,
+      onResponderMove: this.onResponderMove.bind(this),
+      onResponderGrant: this.onResponderGrant.bind(this),
+      onResponderRelease: this.onResponderRelease.bind(this),
       onResponderTerminate: this.handleRelease,
       onResponderTerminationRequest: (evt, gestureState) => true
     });
     this.scroller = Scroller.create(this.handleScroll);
   }
 
-  componentDidMount() {
+  onResponderGrant(evt, gestureState) {
+    this.props.onTransformStart && this.props.onTransformStart();
+    this.setState({responderGranted: true});
     this.measureLayout();
+  }
+
+  onResponderMove(evt, gestureState) {
+    this.handleMove(evt, gestureState);
+  }
+
+  onResponderRelease(evt, gestureState) {
+    this.handleRelease(evt, gestureState);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -144,7 +155,8 @@ export default class ViewTransformer extends React.Component {
   measureLayout() {
     let handle = ReactNative.findNodeHandle(this.refs['innerViewRef']);
     NativeModules.UIManager.measure(handle, ((x, y, width, height, pageX, pageY) => {
-      console.log('measure...pageX=' + pageX + ', pageY=' + pageY);
+      console.log('measureLayout...width=' + width + ', height=' + height);
+
       this.setState({
         width: width,
         height: height,
@@ -237,8 +249,6 @@ export default class ViewTransformer extends React.Component {
   }
 
   handleMove(e, gestureState) {
-    console.log('handleMove...');
-
     if (!this.state.responderGranted) {
       if (Math.abs(gestureState.dx) >= MIN_SCROLL_THRESHOLD || Math.abs(gestureState.dy) >= MIN_SCROLL_THRESHOLD) {
         console.log('handleMove...require responder');
@@ -260,7 +270,7 @@ export default class ViewTransformer extends React.Component {
     }
 
     let transform = {};
-    if (gestureState.previousPinch && gestureState.pinch) {
+    if (gestureState.previousPinch && gestureState.pinch && this.props.enableScale) {
       let scaleBy = gestureState.pinch / gestureState.previousPinch;
       let pivotX = gestureState.moveX - this.state.pageX;
       let pivotY = gestureState.moveY - this.state.pageY;
@@ -369,7 +379,6 @@ export default class ViewTransformer extends React.Component {
       let bottom = fromRect.bottom + (targetRect.bottom - fromRect.bottom) * progress;
 
       let transform = getTransform(this.contentRect(), new Rect(left, top, right, bottom));
-
       this.updateTransform(transform);
     });
 
@@ -404,18 +413,22 @@ export default class ViewTransformer extends React.Component {
     this.animate(rect);
   }
 
-  updateTransform(transform) {
-    if (this.props.enableTransform) {
-      if (!this.props.enableScale) {
-        transform.scale = 1;
-      }
+  // Above are private functions. Do not use them if you don't known what you are doing.
+  // ***********************************************************************************
+  // Below are public functions. Feel free to use them.
 
-      this.setState(transform);
-    }
+
+  updateTransform(transform) {
+    this.setState(transform);
   }
+
 
   forceUpdateTransform(transform) {
     this.setState(transform);
+  }
+
+  getAvailableTranslateSpace() {
+    return availableTranslateSpace(this.transformedContentRect(), this.viewPortRect());
   }
 }
 
