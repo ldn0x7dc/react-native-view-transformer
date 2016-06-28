@@ -21,7 +21,6 @@ export default class ViewTransformer extends React.Component {
   static Rect = Rect;
   static getTransform = getTransform;
 
-
   constructor(props) {
     super(props);
 
@@ -46,9 +45,7 @@ export default class ViewTransformer extends React.Component {
 
     this._viewPortRect = new Rect();
 
-    this.onLayout = this.onLayout.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
-
     this.handleMove = this.handleMove.bind(this);
     this.handleRelease = this.handleRelease.bind(this);
 
@@ -83,14 +80,6 @@ export default class ViewTransformer extends React.Component {
     return new Transform(this.state.scale, this.state.translateX, this.state.translateY);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    this.props.onViewTransformed && this.props.onViewTransformed({
-      scale: this.state.scale,
-      translateX: this.state.translateX,
-      translateY: this.state.translateY
-    });
-  }
-
   render() {
     let gestureResponder = this.gestureResponder;
     if (!this.props.enableTransform) {
@@ -101,29 +90,26 @@ export default class ViewTransformer extends React.Component {
       <View
         {...this.props}
         {...gestureResponder}
-        style={[this.props.style, {overflow: 'visible'}]}>
+        ref={'innerViewRef'}>
         <View
-          ref={'innerViewRef'}
-          onLayout={this.onLayout}
           style={{
             flex: 1,
             transform: [
                   {scale: this.state.scale},
                   {translateX: this.state.translateX},
                   {translateY: this.state.translateY}
-                ],
+                ]
           }}>
           {this.props.children}
         </View>
       </View>
-
     );
   }
 
   componentWillMount() {
     this.gestureResponder = createResponder({
       onStartShouldSetResponder: (evt, gestureState) => {
-        this.onLayout();
+        this.measureLayout();
         return true;
       },
       onMoveShouldSetResponder: this.handleMove,
@@ -139,14 +125,26 @@ export default class ViewTransformer extends React.Component {
     this.scroller = Scroller.create(this.handleScroll);
   }
 
+  componentDidMount() {
+    this.measureLayout();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    this.props.onViewTransformed && this.props.onViewTransformed({
+      scale: this.state.scale,
+      translateX: this.state.translateX,
+      translateY: this.state.translateY
+    });
+  }
+
   componentWillUnmount() {
-    console.log('componentWillUnmount...');
     this.cancelAnimation();
   }
 
-  onLayout(e) {
+  measureLayout() {
     let handle = ReactNative.findNodeHandle(this.refs['innerViewRef']);
     NativeModules.UIManager.measure(handle, ((x, y, width, height, pageX, pageY) => {
+      console.log('measure...pageX=' + pageX + ', pageY=' + pageY);
       this.setState({
         width: width,
         height: height,
@@ -362,7 +360,7 @@ export default class ViewTransformer extends React.Component {
 
     this.state.animator.removeAllListeners();
     this.state.animator.setValue(0);
-    this.state.animator.addListener(function (state) {
+    this.state.animator.addListener((state) =>{
       let progress = state.value;
 
       let left = fromRect.left + (targetRect.left - fromRect.left) * progress;
@@ -373,7 +371,8 @@ export default class ViewTransformer extends React.Component {
       let transform = getTransform(this.contentRect(), new Rect(left, top, right, bottom));
 
       this.updateTransform(transform);
-    }.bind(this));
+    });
+
     Animated.timing(this.state.animator, {
       toValue: 1,
       duration: duration,
@@ -415,7 +414,7 @@ export default class ViewTransformer extends React.Component {
     }
   }
 
-  setTransform(transform) {
+  forceUpdateTransform(transform) {
     this.setState(transform);
   }
 }
