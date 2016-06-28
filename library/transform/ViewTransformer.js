@@ -10,7 +10,7 @@ import ReactNative, {
 
 import {createResponder} from 'react-native-gesture-responder';
 
-import Scroller from '../scroller/Scroller';
+import Scroller from 'react-native-scroller';
 
 import {Rect, Transform, transformedRect, availableTranslateSpace, fitCenterRect, alignedRect, getTransform} from './TransformUtils';
 

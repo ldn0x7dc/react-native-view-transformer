@@ -18,6 +18,6 @@
   "homepage": "https://github.com/ldn0x7dc/react-native-view-transformer#readme",
   "dependencies": {
     "react-native-gesture-responder": "0.0.3",
-    "react-native-scroller": "0.0.3"
+    "react-native-scroller": "0.0.4"
   }
 }
