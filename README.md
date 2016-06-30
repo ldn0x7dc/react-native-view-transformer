@@ -55,7 +55,7 @@ Besides transforming an image, this component is helpful in implementing transit
 
 For example, you want to transform a normal size content into a right-bottom floating small window (like the android youtube app). Using this component, you can do as following:
 
-1. Calculate the normal rect and the final rect. A Rect(left, top, right, bottom) defines the boundary of a view
+1. Calculate the normal rect and the final rect. A `ViewTransformer.Rect(left, top, right, bottom)` object defines the boundary of a view
 2. Use `ViewTransformer.getTransform(fromRect, toRect)` to get the transform object
 3. Use `updateTransform(transform)` to make the tranform happen( This is immediate, but you can animate it by calculating the intermediate rects and then transform using your own animation loop)
 
