@@ -26,7 +26,7 @@ render() {
 
 Now, the wrapped views are transformable!
 
-This component accept following props:
+This component accepts following props:
 
 * `enableTransform` : false to disable transform gestures. Default is true.
 * `enableScale` : false to disable scale. Default is true.
