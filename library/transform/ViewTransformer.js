@@ -80,8 +80,6 @@ export default class ViewTransformer extends React.Component {
   }
 
   componentWillMount() {
-    createResponder.enableDebugLog();
-
     this.gestureResponder = createResponder({
       onStartShouldSetResponder: (evt, gestureState) => true,
       onMoveShouldSetResponderCapture: (evt, gestureState) => true,
