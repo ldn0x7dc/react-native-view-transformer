@@ -23,7 +23,7 @@ export default class App extends Component {
       <ViewTransformer
         enableTransform={true}
         enableScale={true}
-        enableTranslate={false}
+        enableTranslate={true}
         style={{flex: 1}}
         enableResistance={true}
         maxScale={3}>
