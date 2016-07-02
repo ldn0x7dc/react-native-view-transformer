@@ -34,7 +34,7 @@ export default class ViewTransformer extends React.Component {
       pageX: 0,
       pageY: 0,
     };
-    this._viewPortRect = new Rect();
+    this._viewPortRect = new Rect(); //A holder to avoid new too much
 
     this.cancelAnimation = this.cancelAnimation.bind(this);
     this.contentRect = this.contentRect.bind(this);
@@ -92,6 +92,18 @@ export default class ViewTransformer extends React.Component {
     });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    this.props.onViewTransformed && this.props.onViewTransformed({
+      scale: this.state.scale,
+      translateX: this.state.translateX,
+      translateY: this.state.translateY
+    });
+  }
+
+  componentWillUnmount() {
+    this.cancelAnimation();
+  }
+
   render() {
     let gestureResponder = this.gestureResponder;
     if (!this.props.enableTransform) {
@@ -103,12 +115,7 @@ export default class ViewTransformer extends React.Component {
         {...this.props}
         {...gestureResponder}
         ref={'innerViewRef'}
-        onLayout={(e) => {
-          this.props.onLayout && this.props.onLayout(e);
-          const {width, height} = e.nativeEvent.layout;
-          this.setState({width, height});
-          this.measureLayout();
-        }}>
+        onLayout={this.onLayout.bind(this)}>
         <View
           style={{
             flex: 1,
@@ -122,6 +129,31 @@ export default class ViewTransformer extends React.Component {
         </View>
       </View>
     );
+  }
+
+  onLayout(e) {
+    const {width, height} = e.nativeEvent.layout;
+    if(width !== this.state.width || height !== this.state.height) {
+      this.setState({width, height});
+    }
+    this.measureLayout();
+
+    this.props.onLayout && this.props.onLayout(e);
+  }
+
+  measureLayout() {
+    let handle = ReactNative.findNodeHandle(this.refs['innerViewRef']);
+    NativeModules.UIManager.measure(handle, ((x, y, width, height, pageX, pageY) => {
+      if(typeof pageX === 'number' && typeof pageY === 'number') { //avoid undefined values on Android devices
+        if(this.state.pageX !== pageX || this.state.pageY !== pageY) {
+          this.setState({
+            pageX: pageX,
+            pageY: pageY
+          });
+        }
+      }
+
+    }).bind(this));
   }
 
   onResponderGrant(evt, gestureState) {
@@ -209,31 +241,10 @@ export default class ViewTransformer extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    this.props.onViewTransformed && this.props.onViewTransformed({
-      scale: this.state.scale,
-      translateX: this.state.translateX,
-      translateY: this.state.translateY
-    });
-  }
 
-  componentWillUnmount() {
-    this.cancelAnimation();
-  }
 
-  measureLayout() {
-    let handle = ReactNative.findNodeHandle(this.refs['innerViewRef']);
-    NativeModules.UIManager.measure(handle, ((x, y, width, height, pageX, pageY) => {
-      //on Android, width and height may be undefined here, so we don't use them here
 
-      this.setState({
-        //width: width,
-        //height: height,
-        pageX: pageX,
-        pageY: pageY
-      });
-    }).bind(this));
-  }
+
 
   performFling(vx, vy) {
     let startX = 0;
@@ -425,6 +436,7 @@ ViewTransformer.propTypes = {
   maxOverScrollDistance: React.PropTypes.number,
 
   maxScale: React.PropTypes.number,
+  contentAspectRatio: React.PropTypes.number,
 
   /**
    * Use true to enable resistance effect on over pulling. Default is false.
