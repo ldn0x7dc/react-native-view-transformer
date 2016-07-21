@@ -88,7 +88,7 @@ export default class ViewTransformer extends React.Component {
       onResponderGrant: this.onResponderGrant.bind(this),
       onResponderRelease: this.onResponderRelease.bind(this),
       onResponderTerminate: this.onResponderRelease.bind(this),
-      onResponderTerminationRequest: (evt, gestureState) => true
+      onResponderTerminationRequest: (evt, gestureState) => false //Do not allow parent view to intercept gesture
     });
   }
 
