@@ -88,7 +88,10 @@ export default class ViewTransformer extends React.Component {
       onResponderGrant: this.onResponderGrant.bind(this),
       onResponderRelease: this.onResponderRelease.bind(this),
       onResponderTerminate: this.onResponderRelease.bind(this),
-      onResponderTerminationRequest: (evt, gestureState) => false //Do not allow parent view to intercept gesture
+      onResponderTerminationRequest: (evt, gestureState) => false, //Do not allow parent view to intercept gesture
+      onResponderSingleTapConfirmed: (evt, gestureState) => {
+        this.props.onSingleTapConfirmed && this.props.onSingleTapConfirmed();
+      }
     });
   }
 
@@ -445,7 +448,9 @@ ViewTransformer.propTypes = {
 
   onViewTransformed: React.PropTypes.func,
 
-  onTransformGestureReleased: React.PropTypes.func
+  onTransformGestureReleased: React.PropTypes.func,
+
+  onSingleTapConfirmed: React.PropTypes.func
 };
 ViewTransformer.defaultProps = {
   maxOverScrollDistance: 20,
