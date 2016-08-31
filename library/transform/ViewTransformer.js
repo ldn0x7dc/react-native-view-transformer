@@ -138,6 +138,10 @@ export default class ViewTransformer extends React.Component {
     }
     this.measureLayout();
 
+    if (this.props.enableLimits) {
+      setTimeout(() => this.animateBounce(), 1);
+    }
+
     this.props.onLayout && this.props.onLayout(e);
   }
 
@@ -167,7 +171,12 @@ export default class ViewTransformer extends React.Component {
 
     let dx = gestureState.moveX - gestureState.previousMoveX;
     let dy = gestureState.moveY - gestureState.previousMoveY;
-    if (this.props.enableResistance) {
+
+    if (this.props.enableLimits) {
+      let d = this.applyLimits(dx, dy);
+      dx = d.dx;
+      dy = d.dy;
+    } else if (this.props.enableResistance) {
       let d = this.applyResistance(dx, dy);
       dx = d.dx;
       dy = d.dy;
@@ -334,6 +343,69 @@ export default class ViewTransformer extends React.Component {
     }
   }
 
+  applyLimits(dx, dy) {
+    let availablePanDistance = availableTranslateSpace(
+      this.transformedContentRect(),
+      this.viewPortRect()
+    );
+
+    // Calculate until where can the view be moved
+    // This depends if the view is bigger / smaller than the viewport
+    if (this.transformedContentRect().width() < this.viewPortRect().width()) {
+      if (
+        dx < 0 &&
+        this.transformedContentRect().left + dx < this.viewPortRect().left
+      ) {
+          dx = availablePanDistance.left;
+      } else if (
+        dx > 0 &&
+        this.transformedContentRect().right + dx > this.viewPortRect().right
+      ) {
+          dx = -availablePanDistance.right;
+      }
+    } else {
+      if (
+        dx < 0 &&
+        this.transformedContentRect().right + dx < this.viewPortRect().right
+      ) {
+          dx = -availablePanDistance.right;
+      } else if (
+        dx > 0 &&
+        this.transformedContentRect().left + dx > this.viewPortRect().left
+      ) {
+          dx = availablePanDistance.left;
+      }
+    }
+
+    if (this.transformedContentRect().height() < this.viewPortRect().height()) {
+      if (
+        dy > 0 &&
+        this.transformedContentRect().bottom + dy > this.viewPortRect().bottom
+      ) {
+          dy = -availablePanDistance.bottom;
+      } else if (
+        dy < 0 &&
+        this.transformedContentRect().top + dy < this.viewPortRect().top
+      ) {
+          dy = availablePanDistance.top;
+      }
+    } else {
+      if (
+        dy > 0 &&
+        this.transformedContentRect().top + dy > this.viewPortRect().top
+      ) {
+          dy = availablePanDistance.top;
+      } else if (
+        dy < 0 &&
+        this.transformedContentRect().bottom + dy < this.viewPortRect().bottom
+      ) {
+          dy = -availablePanDistance.bottom;
+      }
+    }
+
+    return { dx, dy }
+  }
+
   cancelAnimation() {
     this.state.animator.stopAnimation();
   }
@@ -442,6 +514,7 @@ ViewTransformer.propTypes = {
    * Use true to enable resistance effect on over pulling. Default is false.
    */
   enableResistance: React.PropTypes.bool,
+  enableLimits: React.PropTypes.bool,
 
   onViewTransformed: React.PropTypes.func,
 
@@ -453,5 +526,6 @@ ViewTransformer.defaultProps = {
   enableTranslate: true,
   enableTransform: true,
   maxScale: 1,
-  enableResistance: false
+  enableResistance: false,
+  enableLimits: false,
 };
