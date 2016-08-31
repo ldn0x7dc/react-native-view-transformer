@@ -32,7 +32,8 @@ This component accepts following props:
 * `enableScale` : false to disable scale. Default is true.
 * `enableTranslate` : false to disable translateX/Y. Default is true.
 * `maxScale` : a number. Default is 1.
-* `enableResistance`  : true to resist over pan. Defaul is false.
+* `enableResistance` : true to resist over pan. Default is false.
+* `enableLimits` : true so that the view cannot be moved out of its viewport. Default is false.
 * `maxOverScrollDistance` : a number used to determine final scroll position triggered by fling. Default is 20.
 * `onViewTransformed` : a callback called when transform changed, receiving current transform object, {scale: xxx, translateX: xxx, translateY: xxx}.
 * `onTransformGestureReleased` : a callback called when the transform gesture is released,  receiving current transform object, {scale: xxx, translateX: xxx, translateY: xxx}. Return true to abort further animations like bounce back.
