@@ -19,9 +19,10 @@ export default class ViewTransformer extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       //transform state
-      scale: 1,
+      scale: props.initialScale,
       translateX: 0,
       translateY: 0,
 
@@ -507,6 +508,7 @@ ViewTransformer.propTypes = {
    */
   maxOverScrollDistance: React.PropTypes.number,
 
+  initialScale: React.PropTypes.number,
   maxScale: React.PropTypes.number,
   contentAspectRatio: React.PropTypes.number,
 
@@ -525,6 +527,7 @@ ViewTransformer.defaultProps = {
   enableScale: true,
   enableTranslate: true,
   enableTransform: true,
+  initialScale: 1,
   maxScale: 1,
   enableResistance: false,
   enableLimits: false,
