@@ -19,9 +19,10 @@ export default class ViewTransformer extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       //transform state
-      scale: 1,
+      scale: props.initialScale,
       translateX: 0,
       translateY: 0,
 
@@ -133,7 +134,7 @@ export default class ViewTransformer extends React.Component {
 
   onLayout(e) {
     const {width, height} = e.nativeEvent.layout;
-    if(width !== this.state.width || height !== this.state.height) {
+    if (width !== this.state.width || height !== this.state.height) {
       this.setState({width, height});
     }
     this.measureLayout();
@@ -167,7 +168,12 @@ export default class ViewTransformer extends React.Component {
 
     let dx = gestureState.moveX - gestureState.previousMoveX;
     let dy = gestureState.moveY - gestureState.previousMoveY;
-    if (this.props.enableResistance) {
+
+    if (this.props.enableLimits) {
+      let d = this.applyLimits(dx, dy);
+      dx = d.dx;
+      dy = d.dy;
+    } else if (this.props.enableResistance) {
       let d = this.applyResistance(dx, dy);
       dx = d.dx;
       dy = d.dy;
@@ -184,13 +190,12 @@ export default class ViewTransformer extends React.Component {
       let pivotY = gestureState.moveY - this.state.pageY;
 
 
-      let rect = transformedRect(transformedRect(this.contentRect(), this.currentTransform()), new Transform(
-        scaleBy, dx, dy,
-        {
-          x: pivotX,
-          y: pivotY
-        }
-      ));
+      let rect = transformedRect(
+        transformedRect(this.contentRect(), this.currentTransform()),
+        new Transform(
+          scaleBy, dx, dy, { x: pivotX, y: pivotY }
+        )
+      );
       transform = getTransform(this.contentRect(), rect);
     } else {
       if (Math.abs(dx) > 2 * Math.abs(dy)) {
@@ -240,11 +245,6 @@ export default class ViewTransformer extends React.Component {
       }
     }
   }
-
-
-
-
-
 
   performFling(vx, vy) {
     let startX = 0;
@@ -332,6 +332,69 @@ export default class ViewTransformer extends React.Component {
     return {
       dx, dy
     }
+  }
+
+  applyLimits(dx, dy) {
+    let availablePanDistance = availableTranslateSpace(
+      this.transformedContentRect(),
+      this.viewPortRect()
+    );
+
+    // Calculate until where can the view be moved
+    // This depends if the view is bigger / smaller than the viewport
+    if (this.transformedContentRect().width() < this.viewPortRect().width()) {
+      if (
+        dx < 0 &&
+        this.transformedContentRect().left + dx < this.viewPortRect().left
+      ) {
+          dx = availablePanDistance.left;
+      } else if (
+        dx > 0 &&
+        this.transformedContentRect().right + dx > this.viewPortRect().right
+      ) {
+          dx = -availablePanDistance.right;
+      }
+    } else {
+      if (
+        dx < 0 &&
+        this.transformedContentRect().right + dx < this.viewPortRect().right
+      ) {
+          dx = -availablePanDistance.right;
+      } else if (
+        dx > 0 &&
+        this.transformedContentRect().left + dx > this.viewPortRect().left
+      ) {
+          dx = availablePanDistance.left;
+      }
+    }
+
+    if (this.transformedContentRect().height() < this.viewPortRect().height()) {
+      if (
+        dy > 0 &&
+        this.transformedContentRect().bottom + dy > this.viewPortRect().bottom
+      ) {
+          dy = -availablePanDistance.bottom;
+      } else if (
+        dy < 0 &&
+        this.transformedContentRect().top + dy < this.viewPortRect().top
+      ) {
+          dy = availablePanDistance.top;
+      }
+    } else {
+      if (
+        dy > 0 &&
+        this.transformedContentRect().top + dy > this.viewPortRect().top
+      ) {
+          dy = availablePanDistance.top;
+      } else if (
+        dy < 0 &&
+        this.transformedContentRect().bottom + dy < this.viewPortRect().bottom
+      ) {
+          dy = -availablePanDistance.bottom;
+      }
+    }
+
+    return { dx, dy }
   }
 
   cancelAnimation() {
@@ -435,6 +498,7 @@ ViewTransformer.propTypes = {
    */
   maxOverScrollDistance: React.PropTypes.number,
 
+  initialScale: React.PropTypes.number,
   maxScale: React.PropTypes.number,
   contentAspectRatio: React.PropTypes.number,
 
@@ -442,6 +506,7 @@ ViewTransformer.propTypes = {
    * Use true to enable resistance effect on over pulling. Default is false.
    */
   enableResistance: React.PropTypes.bool,
+  enableLimits: React.PropTypes.bool,
 
   onViewTransformed: React.PropTypes.func,
 
@@ -452,6 +517,8 @@ ViewTransformer.defaultProps = {
   enableScale: true,
   enableTranslate: true,
   enableTransform: true,
+  initialScale: 1,
   maxScale: 1,
-  enableResistance: false
+  enableResistance: false,
+  enableLimits: false,
 };
