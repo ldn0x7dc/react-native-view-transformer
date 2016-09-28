@@ -55,6 +55,12 @@ export default class ViewTransformer extends React.Component {
     });
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.initialScale != nextProps.initialScale) {
+      this.updateTransform({ scale: nextProps.initialScale })
+    }
+  }
+
   viewPortRect() {
     this._viewPortRect.set(0, 0, this.state.width, this.state.height);
     return this._viewPortRect;
@@ -116,16 +122,18 @@ export default class ViewTransformer extends React.Component {
         {...this.props}
         {...gestureResponder}
         ref={'innerViewRef'}
-        onLayout={this.onLayout.bind(this)}>
+        onLayout={this.onLayout.bind(this)}
+      >
         <View
           style={{
             flex: 1,
             transform: [
-                  {scale: this.state.scale},
-                  {translateX: this.state.translateX},
-                  {translateY: this.state.translateY}
-                ]
-          }}>
+              {scale: this.state.scale},
+              {translateX: this.state.translateX},
+              {translateY: this.state.translateY},
+            ]
+          }}
+        >
           {this.props.children}
         </View>
       </View>
