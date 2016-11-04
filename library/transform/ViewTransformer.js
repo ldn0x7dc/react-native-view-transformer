@@ -297,7 +297,9 @@ export default class ViewTransformer extends React.Component {
   }
 
   performDoubleTapUp(pivotX, pivotY) {
-    console.log('performDoubleTapUp...pivot=' + pivotX + ', ' + pivotY);
+    if (__DEV__) {
+      console.log('performDoubleTapUp...pivot=' + pivotX + ', ' + pivotY);
+    }
     let curScale = this.state.scale;
     let scaleBy;
     if (curScale > (1 + this.props.maxScale) / 2) {
@@ -349,7 +351,9 @@ export default class ViewTransformer extends React.Component {
 
     let fromRect = this.transformedContentRect();
     if (fromRect.equals(targetRect)) {
-      console.log('animate...equal rect, skip animation');
+      if (__DEV__) {
+        console.log('animate...equal rect, skip animation');
+      }
       return;
     }
 
