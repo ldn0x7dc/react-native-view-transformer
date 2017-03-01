@@ -244,7 +244,7 @@ export default class ViewTransformer extends React.Component {
       }
     } else {
       if(this.props.enableTranslate) {
-        this.performFling(gestureState.vx, gestureState.vy);
+        this.props.enableFling && this.performFling(gestureState.vx, gestureState.vy);
       } else {
         this.animateBounce();
       }
@@ -452,6 +452,11 @@ ViewTransformer.propTypes = {
    * Use true to enable resistance effect on over pulling. Default is false.
    */
   enableResistance: React.PropTypes.bool,
+  /**
+   * Use false to disable flinging back after moving the image away from the center.
+   * Default is true.
+   */
+  enableFling: React.PropTypes.bool,
 
   onViewTransformed: React.PropTypes.func,
 
@@ -480,6 +485,7 @@ ViewTransformer.defaultProps = {
   enableTransform: true,
   maxScale: 1,
   enableResistance: false,
+  enableFling: true,
   onSingleTap: undefined,
   onSingleTapConfirmed: undefined,
   onDoubleTap: undefined,
