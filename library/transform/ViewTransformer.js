@@ -237,7 +237,11 @@ export default class ViewTransformer extends React.Component {
         pivotY = gestureState.y0 - this.state.pageY;
       }
 
-      this.performDoubleTapUp(pivotX, pivotY);
+      if (this.props.onDoubleTap) {
+        this.props.onDoubleTap(pivotX, pivotY);
+      } else {
+        this.performDoubleTapUp(pivotX, pivotY);
+      }
     } else {
       if(this.props.enableTranslate) {
         this.performFling(gestureState.vx, gestureState.vy);
@@ -453,8 +457,21 @@ ViewTransformer.propTypes = {
 
   onTransformGestureReleased: React.PropTypes.func,
 
+  /**
+   * Callback on a single tap (includes first and second tap of double-tap)
+   */
   onSingleTap: React.PropTypes.func,
+  /**
+   * Callback on a single tap which is not part of a double-tap
+   */
   onSingleTapConfirmed: React.PropTypes.func,
+  /**
+   * Callback on a double tap (if supplied, it overwrites default scaling behavior)
+   *
+   * The first two arguments of the callback are the x- and y-coordinates of the
+   * finger while tapping, respectively.
+   */
+  onDoubleTap: React.PropTypes.func,
 };
 ViewTransformer.defaultProps = {
   maxOverScrollDistance: 20,
@@ -465,4 +482,5 @@ ViewTransformer.defaultProps = {
   enableResistance: false,
   onSingleTap: undefined,
   onSingleTapConfirmed: undefined,
+  onDoubleTap: undefined,
 };
