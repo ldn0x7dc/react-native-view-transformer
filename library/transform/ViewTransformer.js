@@ -219,6 +219,9 @@ export default class ViewTransformer extends React.Component {
       return;
     }
 
+    if (gestureState.singleTapUp) {
+      this.props.onSingleTap && this.props.onSingleTap();
+    }
 
     if (gestureState.doubleTapUp) {
       if (!this.props.enableScale) {
@@ -450,7 +453,8 @@ ViewTransformer.propTypes = {
 
   onTransformGestureReleased: React.PropTypes.func,
 
-  onSingleTapConfirmed: React.PropTypes.func
+  onSingleTap: React.PropTypes.func,
+  onSingleTapConfirmed: React.PropTypes.func,
 };
 ViewTransformer.defaultProps = {
   maxOverScrollDistance: 20,
@@ -458,5 +462,7 @@ ViewTransformer.defaultProps = {
   enableTranslate: true,
   enableTransform: true,
   maxScale: 1,
-  enableResistance: false
+  enableResistance: false,
+  onSingleTap: undefined,
+  onSingleTapConfirmed: undefined,
 };
