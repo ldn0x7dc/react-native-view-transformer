@@ -219,6 +219,9 @@ export default class ViewTransformer extends React.Component {
       return;
     }
 
+    if (gestureState.singleTapUp) {
+      this.props.onSingleTap && this.props.onSingleTap();
+    }
 
     if (gestureState.doubleTapUp) {
       if (!this.props.enableScale) {
@@ -234,10 +237,14 @@ export default class ViewTransformer extends React.Component {
         pivotY = gestureState.y0 - this.state.pageY;
       }
 
-      this.performDoubleTapUp(pivotX, pivotY);
+      if (this.props.onDoubleTap) {
+        this.props.onDoubleTap(pivotX, pivotY);
+      } else {
+        this.performDoubleTapUp(pivotX, pivotY);
+      }
     } else {
       if(this.props.enableTranslate) {
-        this.performFling(gestureState.vx, gestureState.vy);
+        this.props.enableFling && this.performFling(gestureState.vx, gestureState.vy);
       } else {
         this.animateBounce();
       }
@@ -445,12 +452,31 @@ ViewTransformer.propTypes = {
    * Use true to enable resistance effect on over pulling. Default is false.
    */
   enableResistance: React.PropTypes.bool,
+  /**
+   * Use false to disable flinging back after moving the image away from the center.
+   * Default is true.
+   */
+  enableFling: React.PropTypes.bool,
 
   onViewTransformed: React.PropTypes.func,
 
   onTransformGestureReleased: React.PropTypes.func,
 
-  onSingleTapConfirmed: React.PropTypes.func
+  /**
+   * Callback on a single tap (includes first and second tap of double-tap)
+   */
+  onSingleTap: React.PropTypes.func,
+  /**
+   * Callback on a single tap which is not part of a double-tap
+   */
+  onSingleTapConfirmed: React.PropTypes.func,
+  /**
+   * Callback on a double tap (if supplied, it overwrites default scaling behavior)
+   *
+   * The first two arguments of the callback are the x- and y-coordinates of the
+   * finger while tapping, respectively.
+   */
+  onDoubleTap: React.PropTypes.func,
 };
 ViewTransformer.defaultProps = {
   maxOverScrollDistance: 20,
@@ -458,5 +484,9 @@ ViewTransformer.defaultProps = {
   enableTranslate: true,
   enableTransform: true,
   maxScale: 1,
-  enableResistance: false
+  enableResistance: false,
+  enableFling: true,
+  onSingleTap: undefined,
+  onSingleTapConfirmed: undefined,
+  onDoubleTap: undefined,
 };
