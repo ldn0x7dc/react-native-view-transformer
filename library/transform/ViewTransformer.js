@@ -88,7 +88,7 @@ export default class ViewTransformer extends React.Component {
       onResponderGrant: this.onResponderGrant.bind(this),
       onResponderRelease: this.onResponderRelease.bind(this),
       onResponderTerminate: this.onResponderRelease.bind(this),
-      onResponderTerminationRequest: (evt, gestureState) => false, //Do not allow parent view to intercept gesture
+      onResponderTerminationRequest: this.onResponderTerminationRequest.bind(this),
       onResponderSingleTapConfirmed: (evt, gestureState) => {
         this.props.onSingleTapConfirmed && this.props.onSingleTapConfirmed();
       }
@@ -157,6 +157,14 @@ export default class ViewTransformer extends React.Component {
       }
 
     }).bind(this));
+  }
+
+  onResponderTerminationRequest() {
+    if(this.props.allowTerminationRequest){
+      const {left, right, top, bottom} = this.getAvailableTranslateSpace();
+      return left < 0 || right < 0 || top < 0 || bottom < 0;
+    }
+    return false;
   }
 
   onResponderGrant(evt, gestureState) {
@@ -433,6 +441,11 @@ ViewTransformer.propTypes = {
    */
   enableTranslate: React.PropTypes.bool,
 
+  /**
+  * Use true to allow parent component control the gesture event on over pulling, Default is false.
+  */
+  allowTerminationRequest: React.PropTypes.bool,
+  
   /**
    * Default is 20
    */
