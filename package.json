@@ -16,6 +16,11 @@
     "url": "https://github.com/ldn0x7dc/react-native-view-transformer/issues"
   },
   "homepage": "https://github.com/ldn0x7dc/react-native-view-transformer#readme",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "prop-types": "*"
+  },
   "dependencies": {
     "react-native-gesture-responder": "0.1.1",
     "react-native-scroller": "0.0.6"
