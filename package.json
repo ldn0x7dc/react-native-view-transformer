@@ -1,5 +1,5 @@
 {
-  "name": "@application-developer/react-native-view-transformer",
+  "name": "@applications-developer/react-native-view-transformer",
   "version": "0.1.0",
   "description": "A pure JavaScript RN component that makes ANY views transformable using gestures like pinch, double tap or pull.",
   "main": "library/index.js",
