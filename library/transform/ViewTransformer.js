@@ -1,18 +1,27 @@
 'use strict';
 
-import React from 'react';
-import ReactNative, {
+import React, { Component } from 'react';
+import {
   View,
   Animated,
   Easing,
-  NativeModules
+  NativeModules,
 } from 'react-native';
+import PropTypes from 'prop-types';
 
-import {createResponder} from 'react-native-gesture-responder';
+import { createResponder } from 'react-native-gesture-responder';
 import Scroller from 'react-native-scroller';
-import {Rect, Transform, transformedRect, availableTranslateSpace, fitCenterRect, alignedRect, getTransform} from './TransformUtils';
+import {
+  Rect,
+  Transform,
+  transformedRect,
+  availableTranslateSpace,
+  fitCenterRect,
+  alignedRect,
+  getTransform,
+} from './TransformUtils';
 
-export default class ViewTransformer extends React.Component {
+export default class ViewTransformer extends Component {
 
   static Rect = Rect;
   static getTransform = getTransform;
@@ -421,36 +430,36 @@ ViewTransformer.propTypes = {
   /**
    * Use false to disable transform. Default is true.
    */
-  enableTransform: React.PropTypes.bool,
+  enableTransform: PropTypes.bool,
 
   /**
    * Use false to disable scaling. Default is true.
    */
-  enableScale: React.PropTypes.bool,
+  enableScale: PropTypes.bool,
 
   /**
    * Use false to disable translateX/translateY. Default is true.
    */
-  enableTranslate: React.PropTypes.bool,
+  enableTranslate: PropTypes.bool,
 
   /**
    * Default is 20
    */
-  maxOverScrollDistance: React.PropTypes.number,
+  maxOverScrollDistance: PropTypes.number,
 
-  maxScale: React.PropTypes.number,
-  contentAspectRatio: React.PropTypes.number,
+  maxScale: PropTypes.number,
+  contentAspectRatio: PropTypes.number,
 
   /**
    * Use true to enable resistance effect on over pulling. Default is false.
    */
-  enableResistance: React.PropTypes.bool,
+  enableResistance: PropTypes.bool,
 
-  onViewTransformed: React.PropTypes.func,
+  onViewTransformed: PropTypes.func,
 
-  onTransformGestureReleased: React.PropTypes.func,
+  onTransformGestureReleased: PropTypes.func,
 
-  onSingleTapConfirmed: React.PropTypes.func
+  onSingleTapConfirmed: PropTypes.func
 };
 ViewTransformer.defaultProps = {
   maxOverScrollDistance: 20,
