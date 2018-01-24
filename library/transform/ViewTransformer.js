@@ -93,7 +93,6 @@ export default class ViewTransformer extends React.Component {
       onResponderSingleTapConfirmed: (evt, gestureState) => {
         this.props.onSingleTapConfirmed && this.props.onSingleTapConfirmed();
       },
-      onResponderTerminationRequest: (evt, gestureState) => false //Do not allow parent view to intercept gesture
     });
   }
 
