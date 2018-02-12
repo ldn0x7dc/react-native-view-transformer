@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import ReactNative, {
   View,
   Animated,
@@ -55,12 +56,6 @@ export default class ViewTransformer extends React.Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.initialScale != nextProps.initialScale) {
-      this.updateTransform({ scale: nextProps.initialScale })
-    }
-  }
-
   viewPortRect() {
     this._viewPortRect.set(0, 0, this.state.width, this.state.height);
     return this._viewPortRect;
@@ -95,7 +90,10 @@ export default class ViewTransformer extends React.Component {
       onResponderGrant: this.onResponderGrant.bind(this),
       onResponderRelease: this.onResponderRelease.bind(this),
       onResponderTerminate: this.onResponderRelease.bind(this),
-      onResponderTerminationRequest: (evt, gestureState) => false //Do not allow parent view to intercept gesture
+      onResponderTerminationRequest: (evt, gestureState) => false, //Do not allow parent view to intercept gesture
+      onResponderSingleTapConfirmed: (evt, gestureState) => {
+        this.props.onSingleTapConfirmed && this.props.onSingleTapConfirmed();
+      }
     });
   }
 
@@ -122,18 +120,16 @@ export default class ViewTransformer extends React.Component {
         {...this.props}
         {...gestureResponder}
         ref={'innerViewRef'}
-        onLayout={this.onLayout.bind(this)}
-      >
+        onLayout={this.onLayout.bind(this)}>
         <View
           style={{
             flex: 1,
             transform: [
-              {scale: this.state.scale},
-              {translateX: this.state.translateX},
-              {translateY: this.state.translateY},
-            ]
-          }}
-        >
+                  {scale: this.state.scale},
+                  {translateX: this.state.translateX},
+                  {translateY: this.state.translateY}
+                ]
+          }}>
           {this.props.children}
         </View>
       </View>
@@ -489,36 +485,36 @@ ViewTransformer.propTypes = {
   /**
    * Use false to disable transform. Default is true.
    */
-  enableTransform: React.PropTypes.bool,
+  enableTransform: PropTypes.bool,
 
   /**
    * Use false to disable scaling. Default is true.
    */
-  enableScale: React.PropTypes.bool,
+  enableScale: PropTypes.bool,
 
   /**
    * Use false to disable translateX/translateY. Default is true.
    */
-  enableTranslate: React.PropTypes.bool,
+  enableTranslate: PropTypes.bool,
 
   /**
    * Default is 20
    */
-  maxOverScrollDistance: React.PropTypes.number,
+  maxOverScrollDistance: PropTypes.number,
 
-  initialScale: React.PropTypes.number,
-  maxScale: React.PropTypes.number,
-  contentAspectRatio: React.PropTypes.number,
+  initialScale: PropTypes.number,
+  maxScale: PropTypes.number,
+  contentAspectRatio: PropTypes.number,
 
   /**
    * Use true to enable resistance effect on over pulling. Default is false.
    */
-  enableResistance: React.PropTypes.bool,
-  enableLimits: React.PropTypes.bool,
+  enableResistance: PropTypes.bool,
+  enableLimits: PropTypes.bool,
 
-  onViewTransformed: React.PropTypes.func,
+  onViewTransformed: PropTypes.func,
 
-  onTransformGestureReleased: React.PropTypes.func
+  onTransformGestureReleased: PropTypes.func
 };
 ViewTransformer.defaultProps = {
   maxOverScrollDistance: 20,
