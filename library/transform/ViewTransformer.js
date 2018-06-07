@@ -12,7 +12,7 @@ import {createResponder} from 'react-native-gesture-responder';
 import Scroller from 'react-native-scroller';
 import {Rect, Transform, transformedRect, availableTranslateSpace, fitCenterRect, alignedRect, getTransform} from './TransformUtils';
 
-export default class ViewTransformer extends React.Component {
+export default class ViewTransformer extends Component {
 
   static Rect = Rect;
   static getTransform = getTransform;
