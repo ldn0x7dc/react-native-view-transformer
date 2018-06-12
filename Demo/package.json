@@ -6,8 +6,8 @@
     "start": "node_modules/react-native/packager/packager.sh"
   },
   "dependencies": {
-    "react": "15.2.1",
-    "react-native": "^0.29.2",
+    "react": "16.2.0",
+    "react-native": "^0.50.4",
     "react-native-view-transformer": "0.0.28"
   }
 }
